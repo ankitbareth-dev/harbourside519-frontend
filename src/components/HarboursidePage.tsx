@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Harbourside.css";
+import { useNavigate } from "react-router-dom";
 
 // --- Custom Hook for Scroll Reveal ---
 const useScrollReveal = (threshold = 150) => {
@@ -38,6 +39,8 @@ const HarboursidePage: React.FC = () => {
   // Header States
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   // Hero Slider State
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -117,7 +120,7 @@ const HarboursidePage: React.FC = () => {
             </li>
             <li>
               <a
-                href="/rates-and-booking.php"
+                href="/rates-and-booking"
                 className={activePage === "rates-and-booking" ? "active" : ""}
               >
                 Rates And Booking
