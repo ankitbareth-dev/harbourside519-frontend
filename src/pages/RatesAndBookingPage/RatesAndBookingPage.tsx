@@ -1,27 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import "../components/Harbourside.css";
-
-// --- Custom Hook for Scroll Reveal ---
-const useScrollReveal = (threshold = 150) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("reveal-active");
-          }
-        });
-      },
-      { rootMargin: `0px 0px -${threshold}px 0px` },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      if (ref.current) observer.unobserve(ref.current);
-    };
-  }, [threshold]);
-  return ref;
-};
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+import "./RatesAndBookingPage.css";
 
 // --- MOCK DATA (Replace with API/Database later) ---
 const bookedDatesDB = [
@@ -78,11 +59,8 @@ const monthNames = [
   "December",
 ];
 
-const RatesAndBooking: React.FC = () => {
-  // Header States
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const activePage = "rates-and-booking"; // Set active nav link
+const RatesAndBookingPage: React.FC = () => {
+  const navigate = useNavigate();
 
   // Calendar States
   const [calendarCurrentDate, setCalendarCurrentDate] = useState(
@@ -95,13 +73,6 @@ const RatesAndBooking: React.FC = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Effects
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // Calendar Helpers
   const formatDateStr = (date: Date) => {
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
@@ -110,8 +81,8 @@ const RatesAndBooking: React.FC = () => {
   const generateCalendarRows = (year: number, month: number) => {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const rows = [];
-    let cells = [];
+    const rows: React.ReactNode[] = [];
+    let cells: React.ReactNode[] = [];
 
     for (let i = 0; i < firstDay; i++) {
       cells.push(<td key={`empty-${i}`}></td>);
@@ -220,66 +191,21 @@ const RatesAndBooking: React.FC = () => {
     rY++;
   }
 
+  // Form Submit Handler
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert("Quote request submitted! We will get back to you shortly.");
+    setShowModal(false);
+    setCheckInSelection(null);
+    setCheckOutSelection(null);
+  };
+
   return (
     <>
-      {/* ==================== HEADER ==================== */}
-      <header id="mainHeader" className={isScrolled ? "header-active" : ""}>
-        <a href="/" className="logo">
-          HARBOURSIDE519
-        </a>
-        <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <nav id="navbar" className={menuOpen ? "active" : ""}>
-          <ul>
-            <li>
-              <a href="/" className={activePage === "index" ? "active" : ""}>
-                Home
-              </a>
-            </li>
-            <li>
-              <a
-                href="/about"
-                className={activePage === "about" ? "active" : ""}
-              >
-                About us
-              </a>
-            </li>
-            <li>
-              <a
-                href="/gallery"
-                className={activePage === "gallery" ? "active" : ""}
-              >
-                Gallery
-              </a>
-            </li>
-            <li>
-              <a
-                href="/review"
-                className={activePage === "review" ? "active" : ""}
-              >
-                Reviews
-              </a>
-            </li>
-            <li>
-              <a
-                href="/rates-and-booking"
-                className={activePage === "rates-and-booking" ? "active" : ""}
-              >
-                Rates And Booking
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <a href="/book" className="btn-book">
-          BOOK NOW
-        </a>
-      </header>
+      <Header />
 
       {/* ==================== RATES HERO ==================== */}
-      <section className="gallery-hero">
+      <section className="rates-hero">
         <div className="hero-content">
           <h1>Rates & Booking</h1>
         </div>
@@ -295,9 +221,12 @@ const RatesAndBooking: React.FC = () => {
                 <h2 className="section-title m-0">
                   {item.property.property_name} - Rates & Fees
                 </h2>
-                <a href="/getquote" className="btn btn-dark">
+                <button
+                  className="btn btn-dark"
+                  onClick={() => navigate("/book")}
+                >
                   Reserve Now
-                </a>
+                </button>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table className="rates-table text-center shadow-sm">
@@ -470,13 +399,14 @@ const RatesAndBooking: React.FC = () => {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
+                  fontSize: "20px",
                 }}
               >
                 &times;
               </button>
             </div>
             <div className="modal-body bg-light-gray p-4">
-              <form action="/getquote" method="POST">
+              <form onSubmit={handleFormSubmit}>
                 <div className="mb-3 d-none">
                   <select name="property" required>
                     {properties.map((prop, i) => (
@@ -575,84 +505,9 @@ const RatesAndBooking: React.FC = () => {
         </div>
       )}
 
-      {/* ==================== FOOTER ==================== */}
-      <footer className="main-footer">
-        <div className="footer-container">
-          <div className="footer-column brand-col">
-            <a href="/" className="footer-logo">
-              HARBOURSIDE519
-            </a>
-            <p>
-              Where world-class luxury meets the thrill of the waves. Experience
-              the ultimate waterfront retreat at Indian Rocks Beach.
-            </p>
-            <div className="social-links">
-              <a href="#">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-pinterest"></i>
-              </a>
-            </div>
-          </div>
-          <div className="footer-column">
-            <h4>Explore</h4>
-            <ul>
-              <li>
-                <a href="/">Home</a>
-              </li>
-              <li>
-                <a href="/about">About us</a>
-              </li>
-              <li>
-                <a href="/gallery">Gallery</a>
-              </li>
-              <li>
-                <a href="/review">Reviews</a>
-              </li>
-            </ul>
-          </div>
-          <div className="footer-column">
-            <h4>Contact Us</h4>
-            <div className="contact-item">
-              <i className="fas fa-map-marker-alt"></i>
-              <span>Harbourside Condo, Indian Rocks Beach, FL 33785</span>
-            </div>
-            <div className="contact-item">
-              <i className="fas fa-phone"></i>
-              <span>+1-419-205-1435</span>
-            </div>
-            <div className="contact-item">
-              <i className="fas fa-envelope"></i>
-              <span>jgordon101365@Gmail.Com</span>
-            </div>
-          </div>
-          <div className="footer-column booking-col">
-            <h4>Plan Your Stay</h4>
-            <p>
-              Ready for an unforgettable escape? Check our seasonal availability
-              and rates.
-            </p>
-            <a href="/book" className="footer-cta-btn">
-              Check Availability <i className="fas fa-calendar-alt"></i>
-            </a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2026 HARBOURSIDE519 Resort. All rights reserved.</p>
-          <p className="designer-tag">
-            Designed by <span>PREMIUM BUSINESS WEBSITES</span>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 };
 
-export default RatesAndBooking;
+export default RatesAndBookingPage;

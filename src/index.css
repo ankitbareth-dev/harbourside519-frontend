@@ -1,1 +1,170 @@
-@import "tailwindcss";
+/* =========================================
+   GLOBAL RESET & BODY
+========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   CONTAINER
+========================================= */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* =========================================
+   SECTION TITLE
+========================================= */
+.section-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  color: #333;
+  font-size: 1.6rem;
+}
+
+/* =========================================
+   UTILITY CLASSES
+========================================= */
+.d-flex {
+  display: flex;
+}
+.justify-content-between {
+  justify-content: space-between;
+}
+.justify-content-center {
+  justify-content: center;
+}
+.align-items-center {
+  align-items: center;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.gap-4 {
+  gap: 1.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+.mb-5 {
+  margin-bottom: 3rem;
+}
+.m-0 {
+  margin: 0;
+}
+.p-3 {
+  padding: 1rem;
+}
+.p-4 {
+  padding: 1.5rem;
+}
+.w-100 {
+  width: 100%;
+}
+.text-center {
+  text-align: center;
+}
+.text-muted {
+  color: #6c757d;
+}
+.text-uppercase {
+  text-transform: uppercase;
+}
+.fw-bold {
+  font-weight: bold;
+}
+.small {
+  font-size: 0.875em;
+}
+.fs-5 {
+  font-size: 1.25rem;
+}
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.border {
+  border: 1px solid #dee2e6;
+}
+.d-none {
+  display: none;
+}
+
+/* =========================================
+   GRID UTILITIES
+========================================= */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+.col-lg-6 {
+  flex: 0 0 50%;
+  padding: 0 10px;
+  max-width: 50%;
+}
+.col-6 {
+  flex: 0 0 50%;
+  padding: 0 5px;
+}
+@media (max-width: 992px) {
+  .col-lg-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+}
+.btn-dark {
+  background-color: #212529;
+  color: #fff;
+}
+
+/* =========================================
+   FORM ELEMENTS
+========================================= */
+.form-control,
+.form-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: "Poppins", sans-serif;
+}
+
+/* =========================================
+   KEYFRAME ANIMATIONS
+========================================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

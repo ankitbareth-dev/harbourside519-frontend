@@ -1,0 +1,203 @@
+/* =========================================
+   RATES HERO
+========================================= */
+.rates-hero {
+  height: 70vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(0, 51, 51, 0.8) 0%, rgba(0, 0, 0, 0.7) 100%),
+    url("./image/i1.png") center/cover;
+  background-attachment: fixed;
+}
+
+.rates-hero .hero-content h1 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(45px, 8vw, 80px);
+  line-height: 1.1;
+  margin-bottom: -60px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================
+   PAGE CONTENT
+========================================= */
+.page-content {
+  padding-top: 60px;
+  padding-bottom: 60px;
+  background-color: #f6f8f9;
+}
+
+/* =========================================
+   RATES TABLE
+========================================= */
+.rates-table-wrap {
+  margin-bottom: 3rem;
+}
+
+.rates-table {
+  background-color: #fff;
+  border-collapse: collapse;
+  border: 1px solid #00b4e5;
+  width: 100%;
+}
+
+.rates-table thead {
+  background-color: #00bced;
+  color: #fff;
+}
+
+.rates-table th,
+.rates-table td {
+  border: 1px solid #00b4e5;
+  padding: 12px 15px;
+}
+
+/* =========================================
+   AVAILABILITY CALENDAR
+========================================= */
+.availability-section {
+  /* section wrapper */
+}
+
+.calendar-container {
+  background-color: #fbfdff;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid #eaebec;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 35px;
+  height: 12px;
+  margin-right: 8px;
+}
+
+.legend-color.current-date,
+.current-date-cell {
+  background-color: #aae0f3 !important;
+}
+
+.legend-color.start-date {
+  background: linear-gradient(to bottom right, #fff 50%, #ff0000 50%);
+}
+
+.legend-color.end-date {
+  background: linear-gradient(to top left, #fff 50%, #ff0000 50%);
+}
+
+.legend-color.booked,
+.booked-cell {
+  background-color: #ff0000 !important;
+  color: #fff !important;
+}
+
+.start-date-cell {
+  background: linear-gradient(
+    to bottom right,
+    #fff 50%,
+    #ff0000 50%
+  ) !important;
+}
+
+.end-date-cell {
+  background: linear-gradient(to top left, #fff 50%, #ff0000 50%) !important;
+}
+
+.selected-checkin {
+  background-color: #28a745 !important;
+  color: #fff !important;
+}
+
+.selected-checkout {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}
+
+.btn-calendar {
+  background-color: #2c2c2c;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  padding: 6px 15px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+}
+
+.calendar-header {
+  background-color: #3d3d3d;
+  color: #fff;
+  padding: 8px 0;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calendar-table td {
+  height: 45px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.calendar-table td:hover:not(.disabled-date):not(.booked-cell) {
+  background-color: #f0f0f0;
+}
+
+.disabled-date {
+  color: #ccc;
+  cursor: not-allowed !important;
+}
+
+/* =========================================
+   BOOKING MODAL
+========================================= */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-dialog {
+  max-width: 500px;
+  margin: 10vh auto;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+}
+
+.bg-black {
+  background: #000;
+  color: #fff;
+}
+
+.bg-light-gray {
+  background-color: #f0f2f4 !important;
+}

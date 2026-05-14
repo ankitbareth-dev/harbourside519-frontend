@@ -1,45 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
-import "./Harbourside.css";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+import useScrollReveal from "../../hooks/useScrollReveal";
+import "./HomePage.css";
 
-// --- Custom Hook for Scroll Reveal ---
-const useScrollReveal = (threshold = 150) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("reveal-active");
-
-            // Handle staggered animation for gallery items specifically
-            if (entry.target.classList.contains("gallery-section")) {
-              const items = entry.target.querySelectorAll(".gallery-item");
-              items.forEach((item, index) => {
-                (item as HTMLElement).style.transitionDelay = `${index * 0.1}s`;
-              });
-            }
-          }
-        });
-      },
-      { rootMargin: `0px 0px -${threshold}px 0px` },
-    );
-
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      if (ref.current) observer.unobserve(ref.current);
-    };
-  }, [threshold]);
-
-  return ref;
-};
-
-const HarboursidePage: React.FC = () => {
-  // Header States
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
+const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   // Hero Slider State
@@ -50,16 +16,7 @@ const HarboursidePage: React.FC = () => {
     { id: 3, bg: "./image/i3.png" },
   ];
 
-  // Active Page (simulating index.php)
-  const activePage = "index";
-
-  // Effects
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+  // Hero Slider Auto-play
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -67,72 +24,18 @@ const HarboursidePage: React.FC = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
+  // Scroll Reveal Refs
   const aboutRef = useScrollReveal(150);
   const galleryRef = useScrollReveal(100);
 
+  // Navigation Handler
+  const handleNavClick = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <>
-      {/* ==================== HEADER ==================== */}
-      <header id="mainHeader" className={isScrolled ? "header-active" : ""}>
-        <a href="/index.php" className="logo">
-          HARBOURSIDE519
-        </a>
-
-        <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
-        <nav id="navbar" className={menuOpen ? "active" : ""}>
-          <ul>
-            <li>
-              <a
-                href="/index.php"
-                className={activePage === "index" ? "active" : ""}
-              >
-                Home
-              </a>
-            </li>
-            <li>
-              <a
-                href="/about.php"
-                className={activePage === "about" ? "active" : ""}
-              >
-                About us
-              </a>
-            </li>
-            <li>
-              <a
-                href="/gallery.php"
-                className={activePage === "gallery" ? "active" : ""}
-              >
-                Gallery
-              </a>
-            </li>
-            <li>
-              <a
-                href="/review.php"
-                className={activePage === "review" ? "active" : ""}
-              >
-                Reviews
-              </a>
-            </li>
-            <li>
-              <a
-                href="/rates-and-booking"
-                className={activePage === "rates-and-booking" ? "active" : ""}
-              >
-                Rates And Booking
-              </a>
-            </li>
-          </ul>
-        </nav>
-
-        <a href="/book.php" className="btn-book">
-          BOOK NOW
-        </a>
-      </header>
+      <Header />
 
       {/* ==================== HERO ==================== */}
       <section className="hero">
@@ -150,10 +53,24 @@ const HarboursidePage: React.FC = () => {
           <h1>Experience Pure Serenity</h1>
           <p>Where world-class luxury meets the thrill of the waves.</p>
           <div className="hero-btns">
-            <a href="/gallery.php" className="btn-primary">
+            <a
+              href="/gallery"
+              className="btn-primary"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               Explore Waterpark
             </a>
-            <a href="/book.php" className="btn-primary">
+            <a
+              href="/book"
+              className="btn-primary"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/book");
+              }}
+            >
               Stay With Us
             </a>
           </div>
@@ -183,7 +100,7 @@ const HarboursidePage: React.FC = () => {
             walk to the beach.
           </p>
           <a
-            href="/about.php"
+            href="/about"
             className="btn-primary"
             style={{
               color: "#1a1a1a",
@@ -193,6 +110,10 @@ const HarboursidePage: React.FC = () => {
               display: "inline-block",
               fontWeight: 600,
               transition: "0.3s",
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("/about");
             }}
           >
             Learn More
@@ -220,7 +141,13 @@ const HarboursidePage: React.FC = () => {
 
         <div className="gallery-grid">
           <div className="gallery-item item-tall">
-            <a href="/gallery.php">
+            <a
+              href="/gallery"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               <img src="./image/i1.png" alt="" />
               <div className="item-overlay">
                 <h3>All Photos</h3>
@@ -229,7 +156,13 @@ const HarboursidePage: React.FC = () => {
           </div>
 
           <div className="gallery-item item-wide">
-            <a href="/gallery.php">
+            <a
+              href="/gallery"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               <img src="./image/i19.png" alt="Water Slides" />
               <div className="item-overlay">
                 <h3>Water Activities</h3>
@@ -238,7 +171,13 @@ const HarboursidePage: React.FC = () => {
           </div>
 
           <div className="gallery-item">
-            <a href="/gallery.php">
+            <a
+              href="/gallery"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               <img src="./image/i17.png" alt="" />
               <div className="item-overlay">
                 <h3>What's Nearby</h3>
@@ -247,7 +186,13 @@ const HarboursidePage: React.FC = () => {
           </div>
 
           <div className="gallery-item">
-            <a href="/gallery.php">
+            <a
+              href="/gallery"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               <img src="./image/i15.png" alt="" />
               <div className="item-overlay">
                 <h3>Common Area</h3>
@@ -256,7 +201,13 @@ const HarboursidePage: React.FC = () => {
           </div>
 
           <div className="gallery-item item-wide">
-            <a href="/gallery.php">
+            <a
+              href="/gallery"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("/gallery");
+              }}
+            >
               <img src="./image/i3.png" alt="" />
               <div className="item-overlay">
                 <h3>The Stay</h3>
@@ -324,7 +275,14 @@ const HarboursidePage: React.FC = () => {
           </div>
         </div>
 
-        <a href="/amenities.php" className="explore-link">
+        <a
+          href="/amenities"
+          className="explore-link"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick("/amenities");
+          }}
+        >
           Explore All Amenities &rsaquo;
         </a>
       </section>
@@ -354,14 +312,14 @@ const HarboursidePage: React.FC = () => {
                 </h3>
                 <ul className="info-list">
                   <li>
-                    <span>Splash Harbour Water Park</span>{" "}
+                    <span>Splash Harbour Water Park</span>
                     <span>2 min walk</span>
                   </li>
                   <li>
                     <span>Clearwater Beaches</span> <span>3 min walk</span>
                   </li>
                   <li>
-                    <span>John R. Bonner Nature Park</span>{" "}
+                    <span>John R. Bonner Nature Park</span>
                     <span>1 min drive</span>
                   </li>
                 </ul>
@@ -474,88 +432,9 @@ const HarboursidePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ==================== FOOTER ==================== */}
-      <footer className="main-footer">
-        <div className="footer-container">
-          <div className="footer-column brand-col">
-            <a href="/index.php" className="footer-logo">
-              HARBOURSIDE519
-            </a>
-            <p>
-              Where world-class luxury meets the thrill of the waves. Experience
-              the ultimate waterfront retreat at Indian Rocks Beach.
-            </p>
-            <div className="social-links">
-              <a href="#">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-pinterest"></i>
-              </a>
-            </div>
-          </div>
-
-          <div className="footer-column">
-            <h4>Explore</h4>
-            <ul>
-              <li>
-                <a href="/index.php">Home</a>
-              </li>
-              <li>
-                <a href="/about.php">About us</a>
-              </li>
-              <li>
-                <a href="/gallery.php">Gallery</a>
-              </li>
-              <li>
-                <a href="/review.php">Reviews</a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="footer-column">
-            <h4>Contact Us</h4>
-            <div className="contact-item">
-              <i className="fas fa-map-marker-alt"></i>
-              <span>Harbourside Condo, Indian Rocks Beach, FL 33785</span>
-            </div>
-            <div className="contact-item">
-              <i className="fas fa-phone"></i>
-              <span>+1-419-205-1435</span>
-            </div>
-            <div className="contact-item">
-              <i className="fas fa-envelope"></i>
-              <span>jgordon101365@Gmail.Com</span>
-            </div>
-          </div>
-
-          <div className="footer-column booking-col">
-            <h4>Plan Your Stay</h4>
-            <p>
-              Ready for an unforgettable escape? Check our seasonal availability
-              and rates.
-            </p>
-            <a href="/book.php" className="footer-cta-btn">
-              Check Availability <i className="fas fa-calendar-alt"></i>
-            </a>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <p>&copy; 2026 HARBOURSIDE519 Resort. All rights reserved.</p>
-          <p className="designer-tag">
-            Designed by <span>PREMIUM BUSINESS WEBSITES</span>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 };
 
-export default HarboursidePage;
+export default HomePage;

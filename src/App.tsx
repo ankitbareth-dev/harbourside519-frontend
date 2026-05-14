@@ -1,18 +1,29 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HarboursidePage from "./components/HarboursidePage";
-import RatesAndBooking from "./pages/RatesAndBooking"; // Adjust path if you saved it in /pages
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+import { useEffect } from "react";
+import HomePage from "./pages/HomePage/HomePage";
+import RatesAndBookingPage from "./pages/RatesAndBookingPage/RatesAndBookingPage";
+import "./index.css";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
-        {/* Home Page Route */}
-        <Route path="/" element={<HarboursidePage />} />
-
-        {/* Rates & Booking Page Route */}
-        <Route path="/rates-and-booking" element={<RatesAndBooking />} />
-
-        {/* You can add more routes here later for /about, /gallery, etc. */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/rates-and-booking" element={<RatesAndBookingPage />} />
       </Routes>
     </Router>
   );
