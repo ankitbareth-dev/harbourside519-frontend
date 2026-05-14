@@ -3,17 +3,6 @@ import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./RatesAndBookingPage.css";
 
-// --- MOCK DATA FOR CALENDAR (Keep until Bookings API is built) ---
-const bookedDatesDB = [
-  "2024-12-20",
-  "2024-12-21",
-  "2024-12-22",
-  "2025-01-10",
-  "2025-01-11",
-];
-const startDatesDB = ["2024-12-19", "2025-01-09"];
-const endDatesDB = ["2024-12-23", "2025-01-12"];
-
 const monthNames = [
   "January",
   "February",
@@ -44,9 +33,14 @@ interface Rate {
 }
 
 const RatesAndBookingPage: React.FC = () => {
-  // API States (Removed propertyInfo state)
+  // API States
   const [ratesData, setRatesData] = useState<Rate[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Calendar Booked Dates States
+  const [bookedDates, setBookedDates] = useState<string[]>([]);
+  const [startDates, setStartDates] = useState<string[]>([]);
+  const [endDates, setEndDates] = useState<string[]>([]);
 
   // Calendar States
   const [calendarCurrentDate, setCalendarCurrentDate] = useState(
@@ -58,47 +52,66 @@ const RatesAndBookingPage: React.FC = () => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  // Create a UTC version of today for safe comparison
+  const todayUTC = new Date(
+    Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()),
+  );
 
   // --- FETCH DATA FROM API ---
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        // Fixed backticks in URL
-        const response = await fetch("http://localhost:5000/api/rates");
-        if (!response.ok) throw new Error("Failed to fetch rates");
-
-        const data = await response.json();
-        if (data.success) {
-          setRatesData(data.seasonal_rates); // Only setting rates now
-        }
-      } catch (error) {
-        console.error("Error fetching rates:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchRates = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/rates");
+      if (!response.ok) throw new Error("Failed to fetch rates");
+      const data = await response.json();
+      if (data.success) {
+        setRatesData(data.seasonal_rates);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching rates:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const fetchBookedDates = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/booked-dates");
+      if (!response.ok) throw new Error("Failed to fetch booked dates");
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setBookedDates(data.data.bookedDates || []);
+        setStartDates(data.data.startDates || []);
+        setEndDates(data.data.endDates || []);
+      }
+    } catch (error) {
+      console.error("Error fetching booked dates:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchRates();
+    fetchBookedDates();
   }, []);
 
   // --- HELPERS ---
+  // Use UTC methods to ensure strings match the backend's YYYY-MM-DD format
   const formatDateStr = (date: Date) => {
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+    return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
   };
 
-  // Formats YYYY-MM-DD to mm/dd/yyyy safely without timezone shifts
+  // Formats YYYY-MM-DD to mm/dd/yyyy safely without Date object timezone shifts
   const formatDisplayDate = (dateStr: string | null) => {
     if (!dateStr) return "";
-    const date = new Date(dateStr + "T00:00:00");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    return `${parts[1]}/${parts[2]}/${parts[0]}`;
   };
 
   const generateCalendarRows = (year: number, month: number) => {
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Use Date.UTC to prevent timezone offset shifting the days
+    const firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay();
+    const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     const rows: React.ReactNode[] = [];
     let cells: React.ReactNode[] = [];
 
@@ -107,25 +120,43 @@ const RatesAndBookingPage: React.FC = () => {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateObj = new Date(year, month, day);
+      const dateObj = new Date(Date.UTC(year, month, day));
       const dStr = formatDateStr(dateObj);
       let cls =
-        dateObj < today
+        dateObj < todayUTC
           ? "disabled-date"
-          : dateObj.getTime() === today.getTime()
+          : dateObj.getTime() === todayUTC.getTime()
             ? "current-date-cell"
             : "";
 
-      if (bookedDatesDB.includes(dStr)) cls += " booked-cell";
-      if (startDatesDB.includes(dStr)) cls += " start-date-cell";
-      if (endDatesDB.includes(dStr)) cls += " end-date-cell";
-      if (checkInSelection && dateObj.getTime() === checkInSelection.getTime())
-        cls += " selected-checkin";
-      if (
-        checkOutSelection &&
-        dateObj.getTime() === checkOutSelection.getTime()
-      )
-        cls += " selected-checkout";
+      // Apply booking status colors
+      if (bookedDates.includes(dStr)) cls += " booked-cell";
+      if (startDates.includes(dStr)) cls += " start-date-cell";
+      if (endDates.includes(dStr)) cls += " end-date-cell";
+
+      // Apply selection colors
+      if (checkInSelection) {
+        const checkInUTC = new Date(
+          Date.UTC(
+            checkInSelection.getFullYear(),
+            checkInSelection.getMonth(),
+            checkInSelection.getDate(),
+          ),
+        );
+        if (dateObj.getTime() === checkInUTC.getTime())
+          cls += " selected-checkin";
+      }
+      if (checkOutSelection) {
+        const checkOutUTC = new Date(
+          Date.UTC(
+            checkOutSelection.getFullYear(),
+            checkOutSelection.getMonth(),
+            checkOutSelection.getDate(),
+          ),
+        );
+        if (dateObj.getTime() === checkOutUTC.getTime())
+          cls += " selected-checkout";
+      }
 
       cells.push(
         <td key={day} className={cls} onClick={() => handleDateClick(dateObj)}>
@@ -147,9 +178,9 @@ const RatesAndBookingPage: React.FC = () => {
   const handleDateClick = (dateObj: Date) => {
     const dStr = formatDateStr(dateObj);
     if (
-      dateObj < today ||
-      bookedDatesDB.includes(dStr) ||
-      startDatesDB.includes(dStr)
+      dateObj < todayUTC ||
+      bookedDates.includes(dStr) ||
+      startDates.includes(dStr)
     )
       return;
 
@@ -162,14 +193,14 @@ const RatesAndBookingPage: React.FC = () => {
       while (temp <= dateObj) {
         const tStr = formatDateStr(temp);
         if (
-          bookedDatesDB.includes(tStr) ||
-          (startDatesDB.includes(tStr) &&
+          bookedDates.includes(tStr) ||
+          (startDates.includes(tStr) &&
             temp.getTime() !== checkInSelection.getTime())
         ) {
           hasBooked = true;
           break;
         }
-        temp.setDate(temp.getDate() + 1);
+        temp.setUTCDate(temp.getUTCDate() + 1); // Increment safely in UTC
       }
       if (hasBooked) {
         alert("Overlaps with existing booking!");
@@ -197,9 +228,12 @@ const RatesAndBookingPage: React.FC = () => {
         1,
       ),
     );
+
+  // FIX: Refresh now re-fetches the API data as well as clearing selections
   const refreshCalendar = () => {
     setCheckInSelection(null);
     setCheckOutSelection(null);
+    fetchBookedDates();
   };
 
   let rY = calendarCurrentDate.getFullYear(),
@@ -234,7 +268,6 @@ const RatesAndBookingPage: React.FC = () => {
           {/* Rates Section */}
           <div className="rates-table-wrap mb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              {/* Hardcoded property name since we removed the properties table */}
               <h2 className="section-title m-0">
                 Harbourside519 - Rates & Fees
               </h2>
@@ -301,7 +334,6 @@ const RatesAndBookingPage: React.FC = () => {
                               {r.weekend_days}
                             </div>
                           </td>
-                          {/* Using dynamically calculated prices from backend */}
                           <td className="p-3">
                             {r.weekly_price
                               ? `$${r.weekly_price.toFixed(2)}`
@@ -442,7 +474,6 @@ const RatesAndBookingPage: React.FC = () => {
               <form onSubmit={handleFormSubmit}>
                 <div className="mb-3 d-none">
                   <select name="property" required>
-                    {/* Hardcoded property name here too */}
                     <option value="Harbourside519">Harbourside519</option>
                   </select>
                 </div>
