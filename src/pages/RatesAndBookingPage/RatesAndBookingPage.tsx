@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./RatesAndBookingPage.css";
 
-// --- MOCK DATA (Replace with API/Database later) ---
+// --- MOCK DATA FOR CALENDAR (Keep until Bookings API is built) ---
 const bookedDatesDB = [
   "2024-12-20",
   "2024-12-21",
@@ -14,35 +14,6 @@ const bookedDatesDB = [
 ];
 const startDatesDB = ["2024-12-19", "2025-01-09"];
 const endDatesDB = ["2024-12-23", "2025-01-12"];
-
-const properties = [{ id: 1, property_name: "Harbourside 519" }];
-const all_property_rates = [
-  {
-    property: { property_name: "Harbourside 519" },
-    rates: [
-      {
-        season_name: "Standard",
-        start_date: "2025-01-01",
-        end_date: "2025-12-31",
-        nightly_price: 250,
-        weekend_price: 300,
-        weekend_days: "Fri, Sat",
-        weekly_discount: 10,
-        min_stay: 3,
-      },
-      {
-        season_name: "Spring Break",
-        start_date: "2025-03-01",
-        end_date: "2025-03-31",
-        nightly_price: 350,
-        weekend_price: 400,
-        weekend_days: "Fri, Sat",
-        weekly_discount: 5,
-        min_stay: 5,
-      },
-    ],
-  },
-];
 
 const monthNames = [
   "January",
@@ -59,8 +30,35 @@ const monthNames = [
   "December",
 ];
 
+// --- Type Definitions for API Data ---
+interface Rate {
+  id: number;
+  season_name: string;
+  start_date: string | null;
+  end_date: string | null;
+  nightly_price: number;
+  weekend_price: number;
+  weekend_days: string;
+  min_stay: number;
+  weekly_price: number | null;
+  monthly_price: number | null;
+}
+
+interface Property {
+  id: number;
+  name: string;
+  cleaning_fee: number;
+  pet_fee: number;
+  tax_rate_percent: number;
+}
+
 const RatesAndBookingPage: React.FC = () => {
   const navigate = useNavigate();
+
+  // API States
+  const [propertyInfo, setPropertyInfo] = useState<Property | null>(null);
+  const [ratesData, setRatesData] = useState<Rate[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Calendar States
   const [calendarCurrentDate, setCalendarCurrentDate] = useState(
@@ -73,9 +71,42 @@ const RatesAndBookingPage: React.FC = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Calendar Helpers
+  // --- FETCH DATA FROM API ---
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        // Replace 'harbourside519' with your actual property name in the DB if different
+        const response = await fetch("http://localhost:5000/api/rates/Cabin");
+        if (!response.ok) throw new Error("Failed to fetch rates");
+
+        const data = await response.json();
+        if (data.success) {
+          setPropertyInfo(data.property);
+          setRatesData(data.seasonal_rates);
+        }
+      } catch (error) {
+        console.error("Error fetching rates:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRates();
+  }, []);
+
+  // --- HELPERS ---
   const formatDateStr = (date: Date) => {
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+  };
+
+  // Formats YYYY-MM-DD to mm/dd/yyyy safely without timezone shifts
+  const formatDisplayDate = (dateStr: string | null) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr + "T00:00:00");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
   };
 
   const generateCalendarRows = (year: number, month: number) => {
@@ -191,7 +222,6 @@ const RatesAndBookingPage: React.FC = () => {
     rY++;
   }
 
-  // Form Submit Handler
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert("Quote request submitted! We will get back to you shortly.");
@@ -215,36 +245,41 @@ const RatesAndBookingPage: React.FC = () => {
       <main className="page-content">
         <div className="container">
           {/* Rates Section */}
-          {all_property_rates.map((item, index) => (
-            <div className="rates-table-wrap mb-5" key={index}>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="section-title m-0">
-                  {item.property.property_name} - Rates & Fees
-                </h2>
-                <button
-                  className="btn btn-dark"
-                  onClick={() => navigate("/book")}
-                >
-                  Reserve Now
-                </button>
-              </div>
-              <div style={{ overflowX: "auto" }}>
-                <table className="rates-table text-center shadow-sm">
-                  <thead>
-                    <tr style={{ backgroundColor: "#00afb9", color: "white" }}>
-                      <th className="p-3" style={{ width: "30%" }}>
-                        Start Date / End Date
-                      </th>
-                      <th className="p-3">Nightly</th>
-                      <th className="p-3">Weekend Night</th>
-                      <th className="p-3">Weekly</th>
-                      <th className="p-3">Min Stay</th>
+          <div className="rates-table-wrap mb-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="section-title m-0">
+                {propertyInfo ? propertyInfo.name : "Property"} - Rates & Fees
+              </h2>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table className="rates-table text-center shadow-sm">
+                <thead>
+                  <tr style={{ backgroundColor: "#00afb9", color: "white" }}>
+                    <th className="p-3" style={{ width: "30%" }}>
+                      Season / Dates
+                    </th>
+                    <th className="p-3">Nightly</th>
+                    <th className="p-3">Weekend Night</th>
+                    <th className="p-3">Weekly (6 Nts)</th>
+                    <th className="p-3">Monthly (29 Nts)</th>
+                    <th className="p-3">Min Stay</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="p-4 text-center">
+                        Loading rates...
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {item.rates.map((r, rIdx) => {
-                      const weekly_amt =
-                        r.nightly_price * 7 * (1 - r.weekly_discount / 100);
+                  ) : ratesData.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-4 text-center">
+                        No rates available at the moment.
+                      </td>
+                    </tr>
+                  ) : (
+                    ratesData.map((r, rIdx) => {
                       const is_standard = r.season_name === "Standard";
                       return (
                         <tr
@@ -263,9 +298,9 @@ const RatesAndBookingPage: React.FC = () => {
                               className="text-muted"
                               style={{ fontSize: "13px" }}
                             >
-                              {is_standard
-                                ? "01/01/26 - 12/31/26"
-                                : `${new Date(r.start_date).toLocaleDateString("en-US")} - ${new Date(r.end_date).toLocaleDateString("en-US")}`}
+                              {r.start_date && r.end_date
+                                ? `${formatDisplayDate(r.start_date)} - ${formatDisplayDate(r.end_date)}`
+                                : "Applies when no seasonal dates match"}
                             </div>
                           </td>
                           <td className="p-3">${r.nightly_price.toFixed(2)}</td>
@@ -278,20 +313,31 @@ const RatesAndBookingPage: React.FC = () => {
                               {r.weekend_days}
                             </div>
                           </td>
-                          <td className="p-3">${weekly_amt.toFixed(2)}</td>
+                          {/* Using dynamically calculated prices from backend */}
+                          <td className="p-3">
+                            {r.weekly_price
+                              ? `$${r.weekly_price.toFixed(2)}`
+                              : "-"}
+                          </td>
+                          <td className="p-3">
+                            {r.monthly_price
+                              ? `$${r.monthly_price.toFixed(2)}`
+                              : "-"}
+                          </td>
                           <td className="p-3">
                             {r.min_stay} Nights Minimum Stay
                           </td>
                         </tr>
                       );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
-          ))}
+          </div>
 
           {/* Availability Calendar */}
+          {/* ... Calendar remains exactly the same ... */}
           <div className="availability-section mb-5">
             <h2 className="section-title mb-4">Availability</h2>
             <div className="calendar-container p-4">
@@ -409,11 +455,9 @@ const RatesAndBookingPage: React.FC = () => {
               <form onSubmit={handleFormSubmit}>
                 <div className="mb-3 d-none">
                   <select name="property" required>
-                    {properties.map((prop, i) => (
-                      <option key={i} value={prop.property_name}>
-                        {prop.property_name}
-                      </option>
-                    ))}
+                    <option value={propertyInfo?.name}>
+                      {propertyInfo?.name}
+                    </option>
                   </select>
                 </div>
                 <div className="mb-3">
@@ -453,7 +497,9 @@ const RatesAndBookingPage: React.FC = () => {
                       className="form-control"
                       name="checkin"
                       value={
-                        checkInSelection ? formatDateStr(checkInSelection) : ""
+                        checkInSelection
+                          ? formatDisplayDate(formatDateStr(checkInSelection))
+                          : ""
                       }
                       readOnly
                     />
@@ -466,7 +512,7 @@ const RatesAndBookingPage: React.FC = () => {
                       name="checkout"
                       value={
                         checkOutSelection
-                          ? `${formatDateStr(checkOutSelection)}:${Math.round((checkOutSelection.getTime() - checkInSelection!.getTime()) / 86400000)}`
+                          ? `${formatDisplayDate(formatDateStr(checkOutSelection))}:${Math.round((checkOutSelection.getTime() - checkInSelection!.getTime()) / 86400000)}`
                           : ""
                       }
                       readOnly
