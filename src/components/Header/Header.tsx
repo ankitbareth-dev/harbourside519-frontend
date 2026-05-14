@@ -54,36 +54,24 @@ const Header: React.FC = () => {
           </li>
           <li>
             <a
-              href="/about"
+              href="#"
               className={location.pathname === "/about" ? "active" : ""}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/about");
-              }}
             >
               About us
             </a>
           </li>
           <li>
             <a
-              href="/gallery"
+              href="#"
               className={location.pathname === "/gallery" ? "active" : ""}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/gallery");
-              }}
             >
               Gallery
             </a>
           </li>
           <li>
             <a
-              href="/review"
+              href="#"
               className={location.pathname === "/review" ? "active" : ""}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/review");
-              }}
             >
               Reviews
             </a>
@@ -105,14 +93,7 @@ const Header: React.FC = () => {
         </ul>
       </nav>
 
-      <a
-        href="/book"
-        className="btn-book"
-        onClick={(e) => {
-          e.preventDefault();
-          handleNavClick("/book");
-        }}
-      >
+      <a href="#" className="btn-book">
         BOOK NOW
       </a>
     </header>

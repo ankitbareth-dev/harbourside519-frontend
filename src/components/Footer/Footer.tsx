@@ -58,37 +58,13 @@ const Footer: React.FC = () => {
               </a>
             </li>
             <li>
-              <a
-                href="/about"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick("/about");
-                }}
-              >
-                About us
-              </a>
+              <a href="#">About us</a>
             </li>
             <li>
-              <a
-                href="/gallery"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick("/gallery");
-                }}
-              >
-                Gallery
-              </a>
+              <a href="#">Gallery</a>
             </li>
             <li>
-              <a
-                href="/review"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick("/review");
-                }}
-              >
-                Reviews
-              </a>
+              <a href="#">Reviews</a>
             </li>
           </ul>
         </div>
