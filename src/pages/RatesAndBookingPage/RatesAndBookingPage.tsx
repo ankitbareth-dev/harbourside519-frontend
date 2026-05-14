@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./RatesAndBookingPage.css";
@@ -44,19 +43,8 @@ interface Rate {
   monthly_price: number | null;
 }
 
-interface Property {
-  id: number;
-  name: string;
-  cleaning_fee: number;
-  pet_fee: number;
-  tax_rate_percent: number;
-}
-
 const RatesAndBookingPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  // API States
-  const [propertyInfo, setPropertyInfo] = useState<Property | null>(null);
+  // API States (Removed propertyInfo state)
   const [ratesData, setRatesData] = useState<Rate[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -75,14 +63,13 @@ const RatesAndBookingPage: React.FC = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        // Replace 'harbourside519' with your actual property name in the DB if different
-        const response = await fetch("http://localhost:5000/api/rates/Cabin");
+        // Fixed backticks in URL
+        const response = await fetch("http://localhost:5000/api/rates");
         if (!response.ok) throw new Error("Failed to fetch rates");
 
         const data = await response.json();
         if (data.success) {
-          setPropertyInfo(data.property);
-          setRatesData(data.seasonal_rates);
+          setRatesData(data.seasonal_rates); // Only setting rates now
         }
       } catch (error) {
         console.error("Error fetching rates:", error);
@@ -247,8 +234,9 @@ const RatesAndBookingPage: React.FC = () => {
           {/* Rates Section */}
           <div className="rates-table-wrap mb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
+              {/* Hardcoded property name since we removed the properties table */}
               <h2 className="section-title m-0">
-                {propertyInfo ? propertyInfo.name : "Property"} - Rates & Fees
+                Harbourside519 - Rates & Fees
               </h2>
             </div>
             <div style={{ overflowX: "auto" }}>
@@ -337,7 +325,6 @@ const RatesAndBookingPage: React.FC = () => {
           </div>
 
           {/* Availability Calendar */}
-          {/* ... Calendar remains exactly the same ... */}
           <div className="availability-section mb-5">
             <h2 className="section-title mb-4">Availability</h2>
             <div className="calendar-container p-4">
@@ -455,9 +442,8 @@ const RatesAndBookingPage: React.FC = () => {
               <form onSubmit={handleFormSubmit}>
                 <div className="mb-3 d-none">
                   <select name="property" required>
-                    <option value={propertyInfo?.name}>
-                      {propertyInfo?.name}
-                    </option>
+                    {/* Hardcoded property name here too */}
+                    <option value="Harbourside519">Harbourside519</option>
                   </select>
                 </div>
                 <div className="mb-3">
